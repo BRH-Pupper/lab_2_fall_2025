@@ -6,6 +6,52 @@ from visualization_msgs.msg import Marker
 import numpy as np
 
 
+def rotation_x(angle):
+    # rotation about the x-axis implemented for you
+    return np.array(
+        [
+            [1, 0, 0, 0],
+            [0, np.cos(angle), -np.sin(angle), 0],
+            [0, np.sin(angle), np.cos(angle), 0],
+            [0, 0, 0, 1],
+        ]
+    )
+
+def rotation_y(angle):
+    #rotation about y axis
+    return np.array(
+        [
+            [np.cos(angle),0, np.sin(angle), 0],
+        [0, 1, 0, 0],
+            [-np.sin(angle),0, np.cos(angle), 0],
+            [0, 0, 0, 1],
+        ])
+
+
+def rotation_z(angle):
+    ## TODO: Implement the rotation matrix about the z-axis
+    return np.array([     
+        [np.cos(angle), -np.sin(angle),0, 0],
+        [np.sin(angle), np.cos(angle),0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ])
+                
+
+
+def translation(x, y, z):
+    ## TODO: Implement the translation matrix
+    return np.array([
+        [1,0, 0, x],
+        [0, 1,0, y],
+        [0, 0, 1, z],
+        [0, 0, 0, 1]],
+                    )
+
+
+
+
+
 class ForwardKinematics(Node):
 
     def __init__(self):
@@ -35,50 +81,67 @@ class ForwardKinematics(Node):
         joints_of_interest = ["leg_front_l_1", "leg_front_l_2", "leg_front_l_3"]
         self.joint_positions = [msg.position[msg.name.index(joint)] for joint in joints_of_interest]
 
+
+    def fr_leg_fk(self, theta):
+        # Already implemented in Lab 2
+        T_RF_0_1 = translation(0.07500, -0.08350, 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
+        T_RF_1_2 = rotation_y(-1.57080) @ rotation_z(theta[1])
+        T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+        T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+        T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+        return T_RF_0_ee[:3, 3]
+
+    def fl_leg_fk(self, theta):
+        ################################################################################################
+        # TODO: implement forward kinematics here
+        ################################################################################################
+                
+        T_FL_0_1 = translation(0.07500, 0.08350, 0) @ rotation_x(-1.57080) @ rotation_z(theta[0])
+        T_FL_1_2 = rotation_y(-1.57080) @ rotation_z(theta[1])
+        # We changed the frame of reference so that Z is out of the page, (as seen from the lab2 diagram)
+        T_FL_2_3 = translation(0, 0.04940, 0.06850) @ rotation_y(-1.57080) @ rotation_z(-theta[2])
+        # Z is out of the page.
+        T_FL_3_ee = translation(-0.06231, 0.06216, -0.01800)
+
+
+        #T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_ee
+        T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_ee
+        
+        
+        return T_FL_0_ee[:3, 3]
+
+    def br_leg_fk(self, theta):
+        # Already implemented in Lab 2
+        T_RF_0_1 = translation(-0.07500, -(0.0335+.039), 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
+        T_RF_1_2 = rotation_y(-1.57080) @ rotation_z(theta[1])
+        T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+        T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+        T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+        return T_RF_0_ee[:3, 3]
+
+
+    def bl_leg_fk(self, theta):
+        ################################################################################################
+        # TODO: implement forward kinematics here
+        ################################################################################################
+        T_FL_0_1 = translation(-0.07500, 0.0335+.039, 0) @ rotation_x(-1.57080) @ rotation_z(theta[0])
+        T_FL_1_2 = rotation_y(-1.57080) @ rotation_z(theta[1])
+        # We changed the frame of reference so that Z is out of the page, (as seen from the lab2 diagram)
+        T_FL_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(-1.57080) @ rotation_z(theta[2])
+        # Z is out of the page.
+        T_FL_3_ee = translation(-0.06231, -0.06216, 0.01800)
+        T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_ee
+        return T_FL_0_ee[:3, 3]
+
+    
+                        
+
+
+    
+
+        
     def forward_kinematics(self, theta1, theta2, theta3):
 
-        def rotation_x(angle):
-            # rotation about the x-axis implemented for you
-            return np.array(
-                [
-                    [1, 0, 0, 0],
-                    [0, np.cos(angle), -np.sin(angle), 0],
-                    [0, np.sin(angle), np.cos(angle), 0],
-                    [0, 0, 0, 1],
-                ]
-            )
-
-        def rotation_y(angle):
-            #rotation about y axis
-           return np.array(
-                [
-                    [np.cos(angle),0, np.sin(angle), 0],
-                    [0, 1, 0, 0],
-                    [-np.sin(angle),0, np.cos(angle), 0],
-                    [0, 0, 0, 1],
-                ])
-                
-
-        def rotation_z(angle):
-            ## TODO: Implement the rotation matrix about the z-axis
-             return np.array([     
-                    [np.cos(angle), -np.sin(angle),0, 0],
-                    [np.sin(angle), np.cos(angle),0, 0],
-                    [0, 0, 1, 0],
-                    [0, 0, 0, 1],
-                    ])
-                
-
-
-        def translation(x, y, z):
-            ## TODO: Implement the translation matrix
-            return np.array([
-                    [1,0, 0, x],
-                    [0, 1,0, y],
-                    [0, 0, 1, z],
-                    [0, 0, 0, 1],
-                    ])
-            
 
         # T_0_1 (base_link to leg_front_l_1)
         T_0_1 = translation(0.07500, 0.0445, 0) @ rotation_x(1.57080) @ rotation_z(-theta1)
@@ -110,7 +173,8 @@ class ForwardKinematics(Node):
             theta2 = self.joint_positions[1]
             theta3 = self.joint_positions[2]
 
-            end_effector_position = self.forward_kinematics(theta1, theta2, theta3)
+            #end_effector_position = self.forward_kinematics(theta1, theta2, theta3)
+            end_effector_position = self.fl_leg_fk([theta1, theta2, theta3])
 
             marker = Marker()
             marker.header.frame_id = "/base_link"
