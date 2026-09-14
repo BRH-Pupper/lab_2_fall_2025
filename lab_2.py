@@ -104,7 +104,7 @@ class ForwardKinematics(Node):
         T_FL_3_ee = translation(0.06231, 0.06216, 0.01800)
 
 
-        #T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_ee
+        #T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_e
         T_FL_0_ee = T_FL_0_1 @ T_FL_1_2 @ T_FL_2_3 @ T_FL_3_ee
         
         
